@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { ProductService } from './product.service';
 import { status } from '@grpc/grpc-js';
+import { grpcService, grpcMethods } from '../constants/grpc.constants'
 import { 
   CreateProductRequest,
   UpdateProductRequest,
@@ -12,25 +13,25 @@ import {
 } from '../proto/product';
 
 @Controller()
-export class ProductController {
+export class ProductConsumer {
   constructor(private readonly productService: ProductService) {}
 
-  @GrpcMethod('ProductService', 'CreateProduct')
+  @GrpcMethod(grpcService, grpcMethods.create)
   async createProduct(data: CreateProductRequest): Promise<ProductResponse> {
-    console.log("Product Requested for creation");
+    
     const product = await this.productService.createProduct(data);
-    console.log("Product created", product);
+    
     return this.productService.mapToResponse(product);
   }
 
-  @GrpcMethod('ProductService', 'UpdateProduct')
+  @GrpcMethod(grpcService, grpcMethods.update)
   async updateProduct(data: UpdateProductRequest): Promise<ProductResponse> {
     console.log("Upadte Request");
     const product = await this.productService.updateProduct(data);
     return this.productService.mapToResponse(product);
   }
 
-  @GrpcMethod('ProductService', 'GetProduct')
+  @GrpcMethod(grpcService, grpcMethods.get)
   async getProduct(data: ProductID): Promise<ProductResponse> {
     const product = await this.productService.getProduct(data.id);
     if (!product) {
@@ -42,7 +43,7 @@ export class ProductController {
     return this.productService.mapToResponse(product);
   }
 
-  @GrpcMethod('ProductService', 'ListProducts')
+  @GrpcMethod(grpcService, grpcMethods.getList)
   async listProducts(filter: ProductFilter): Promise<ProductListResponse> {
     const result = await this.productService.listProducts(filter);
     return {

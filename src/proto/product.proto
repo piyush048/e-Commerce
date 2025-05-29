@@ -22,14 +22,13 @@ message CreateProductRequest {
 
 message UpdateProductRequest {
   string id = 1;
-  string name = 2;
-  string categoryName = 3;
-  string brand = 4;
-  string imageUrl = 5;
-  string description = 6;
-  double price = 7;
-  int32 totalStock = 8;
-  repeated Variant variants = 9;
+  optional string name = 2;
+  optional string categoryName = 3;
+  optional string brand = 4;
+  optional string imageUrl = 5;
+  optional string description = 6;
+  optional double price = 7;
+  repeated Variant variants = 8;
 }
 
 message Variant {

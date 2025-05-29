@@ -1,8 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Injectable } from '@nestjs/common';
 import { Product } from './schema/product.schema';
-import { Variant } from './schema/variant.schema';
+import { productDao } from './dao/product.dao';
 import { 
   CreateProductRequest,
   UpdateProductRequest,
@@ -12,98 +10,31 @@ import {
 
 @Injectable()
 export class ProductService {
-  constructor(
-    @InjectModel(Product.name) private productModel: Model<Product>,
-    @InjectModel(Variant.name) private variantModel: Model<Variant> 
-  ) {}
+  constructor( private readonly productDao: productDao ) {}
 
   async createProduct(data: CreateProductRequest): Promise<Product> {
-    const newProduct = new this.productModel(data);
-
-    const variants = await Promise.all(
-      data.variants.map(v => 
-        this.variantModel.create({
-          ...v,
-          productId: newProduct._id
-        })
-      )
-    );
-
-    newProduct.variants = variants;
-    newProduct.totalStock = variants.reduce((sum, v) => sum + v.stock, 0);
-    return newProduct.save();
+    return this.productDao.createProductDao(data);
   }
 
   async updateProduct(data: UpdateProductRequest): Promise<Product> {
-    const updatedProduct = await this.productModel.findByIdAndUpdate(
-      data.id,
-      data,
-      { new: true }
-    );
-    if (!updatedProduct) {
-      throw new NotFoundException('Product not found');
-    }
-
-    if(data.variants && data.variants.length > 0) {
-      await this.variantModel.deleteMany({ productId: data.id });
-
-      const variants = await Promise.all(
-        data.variants.map(v => 
-          this.variantModel.create({
-            ...v,
-            productId: updatedProduct._id
-          })
-        )
-      )
-
-      updatedProduct.totalStock = variants.reduce((sum, v) => sum + v.stock, 0);
-      await updatedProduct.save();
-    }
-
-    
-    console.log("Updated Product");
-    return updatedProduct;
+    return this.productDao.updateProductDao(data);
   }
 
   async getProduct(id: string): Promise<Product> {
-    const product = await this.productModel.findById(id)
-      .populate('variants')
-      .lean()
-      .exec();
-  
-    if (!product) {
-      throw new NotFoundException('Product not found');
-    }
-    return product;
+    return this.productDao.getProductDao(id);
   }
 
   async listProducts(filter: any): Promise<ProductListResponse> {
     const page = filter.page || 1;
     const pageSize = filter.pageSize || 10;
 
-    const query: any = {};
-    if (filter.categoryName) {
-      query.categoryName = { $regex: new RegExp(filter.categoryName, 'i') };
-    }
-    if(filter.brand) {
-      query.brand = { $regex: new RegExp(filter.brand, 'i') };
-    }
-
-    const [products, total] = await Promise.all([
-      this.productModel.find(query)
-        .skip((page - 1) * pageSize)
-        .limit(pageSize)
-        .populate('variants')
-        .lean()
-        .exec(),
-      this.productModel.countDocuments(query).exec()
-    ]);
+    const { products, total } = await this.productDao.listProductsDao(filter);
 
     return {
-        products: products.map(product => this.mapToResponse(product)),
-        total,
-        page,
-        pageSize: pageSize
+      products: products.map((product) => this.mapToResponse(product)),
+      total,
+      page,
+      pageSize,
     };
   }
 

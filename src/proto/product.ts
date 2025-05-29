@@ -34,13 +34,12 @@ export interface CreateProductRequest {
 
 export interface UpdateProductRequest {
   id: string;
-  name: string;
-  categoryName: string;
-  brand: string;
-  imageUrl: string;
-  description: string;
-  price: number;
-  totalStock: number;
+  name?: string | undefined;
+  categoryName?: string | undefined;
+  brand?: string | undefined;
+  imageUrl?: string | undefined;
+  description?: string | undefined;
+  price?: number | undefined;
   variants: Variant[];
 }
 
@@ -271,13 +270,12 @@ export const CreateProductRequest: MessageFns<CreateProductRequest> = {
 function createBaseUpdateProductRequest(): UpdateProductRequest {
   return {
     id: "",
-    name: "",
-    categoryName: "",
-    brand: "",
-    imageUrl: "",
-    description: "",
-    price: 0,
-    totalStock: 0,
+    name: undefined,
+    categoryName: undefined,
+    brand: undefined,
+    imageUrl: undefined,
+    description: undefined,
+    price: undefined,
     variants: [],
   };
 }
@@ -287,29 +285,26 @@ export const UpdateProductRequest: MessageFns<UpdateProductRequest> = {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
-    if (message.name !== "") {
+    if (message.name !== undefined) {
       writer.uint32(18).string(message.name);
     }
-    if (message.categoryName !== "") {
+    if (message.categoryName !== undefined) {
       writer.uint32(26).string(message.categoryName);
     }
-    if (message.brand !== "") {
+    if (message.brand !== undefined) {
       writer.uint32(34).string(message.brand);
     }
-    if (message.imageUrl !== "") {
+    if (message.imageUrl !== undefined) {
       writer.uint32(42).string(message.imageUrl);
     }
-    if (message.description !== "") {
+    if (message.description !== undefined) {
       writer.uint32(50).string(message.description);
     }
-    if (message.price !== 0) {
+    if (message.price !== undefined) {
       writer.uint32(57).double(message.price);
     }
-    if (message.totalStock !== 0) {
-      writer.uint32(64).int32(message.totalStock);
-    }
     for (const v of message.variants) {
-      Variant.encode(v!, writer.uint32(74).fork()).join();
+      Variant.encode(v!, writer.uint32(66).fork()).join();
     }
     return writer;
   },
@@ -378,15 +373,7 @@ export const UpdateProductRequest: MessageFns<UpdateProductRequest> = {
           continue;
         }
         case 8: {
-          if (tag !== 64) {
-            break;
-          }
-
-          message.totalStock = reader.int32();
-          continue;
-        }
-        case 9: {
-          if (tag !== 74) {
+          if (tag !== 66) {
             break;
           }
 
@@ -405,13 +392,12 @@ export const UpdateProductRequest: MessageFns<UpdateProductRequest> = {
   fromJSON(object: any): UpdateProductRequest {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      categoryName: isSet(object.categoryName) ? globalThis.String(object.categoryName) : "",
-      brand: isSet(object.brand) ? globalThis.String(object.brand) : "",
-      imageUrl: isSet(object.imageUrl) ? globalThis.String(object.imageUrl) : "",
-      description: isSet(object.description) ? globalThis.String(object.description) : "",
-      price: isSet(object.price) ? globalThis.Number(object.price) : 0,
-      totalStock: isSet(object.totalStock) ? globalThis.Number(object.totalStock) : 0,
+      name: isSet(object.name) ? globalThis.String(object.name) : undefined,
+      categoryName: isSet(object.categoryName) ? globalThis.String(object.categoryName) : undefined,
+      brand: isSet(object.brand) ? globalThis.String(object.brand) : undefined,
+      imageUrl: isSet(object.imageUrl) ? globalThis.String(object.imageUrl) : undefined,
+      description: isSet(object.description) ? globalThis.String(object.description) : undefined,
+      price: isSet(object.price) ? globalThis.Number(object.price) : undefined,
       variants: globalThis.Array.isArray(object?.variants) ? object.variants.map((e: any) => Variant.fromJSON(e)) : [],
     };
   },
@@ -421,26 +407,23 @@ export const UpdateProductRequest: MessageFns<UpdateProductRequest> = {
     if (message.id !== "") {
       obj.id = message.id;
     }
-    if (message.name !== "") {
+    if (message.name !== undefined) {
       obj.name = message.name;
     }
-    if (message.categoryName !== "") {
+    if (message.categoryName !== undefined) {
       obj.categoryName = message.categoryName;
     }
-    if (message.brand !== "") {
+    if (message.brand !== undefined) {
       obj.brand = message.brand;
     }
-    if (message.imageUrl !== "") {
+    if (message.imageUrl !== undefined) {
       obj.imageUrl = message.imageUrl;
     }
-    if (message.description !== "") {
+    if (message.description !== undefined) {
       obj.description = message.description;
     }
-    if (message.price !== 0) {
+    if (message.price !== undefined) {
       obj.price = message.price;
-    }
-    if (message.totalStock !== 0) {
-      obj.totalStock = Math.round(message.totalStock);
     }
     if (message.variants?.length) {
       obj.variants = message.variants.map((e) => Variant.toJSON(e));
@@ -454,13 +437,12 @@ export const UpdateProductRequest: MessageFns<UpdateProductRequest> = {
   fromPartial(object: DeepPartial<UpdateProductRequest>): UpdateProductRequest {
     const message = createBaseUpdateProductRequest();
     message.id = object.id ?? "";
-    message.name = object.name ?? "";
-    message.categoryName = object.categoryName ?? "";
-    message.brand = object.brand ?? "";
-    message.imageUrl = object.imageUrl ?? "";
-    message.description = object.description ?? "";
-    message.price = object.price ?? 0;
-    message.totalStock = object.totalStock ?? 0;
+    message.name = object.name ?? undefined;
+    message.categoryName = object.categoryName ?? undefined;
+    message.brand = object.brand ?? undefined;
+    message.imageUrl = object.imageUrl ?? undefined;
+    message.description = object.description ?? undefined;
+    message.price = object.price ?? undefined;
     message.variants = object.variants?.map((e) => Variant.fromPartial(e)) || [];
     return message;
   },
